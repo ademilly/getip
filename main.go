@@ -14,10 +14,21 @@ func excludeLast(arr []string) []string {
 	return arr[:len(arr)-1]
 }
 
-func getIP(w http.ResponseWriter, r *http.Request) {
-	add := strings.Join(excludeLast(strings.Split(r.RemoteAddr, ":")), ":")
+func formatAddr(addr string) string {
+	return strings.Join(excludeLast(strings.Split(addr, ":")), ":")
+}
 
-	w.Write([]byte(add))
+func getIP(w http.ResponseWriter, r *http.Request) {
+        addr := ""
+        if r.Header.Get("x-real-ip") != "" {
+            addr = r.Header.Get("x-real-ip")
+	} else {
+	    addr = formatAddr(r.RemoteAddr)
+	}
+
+	log.Printf("%s request from %s", r.Method, addr)
+
+	w.Write([]byte(addr))
 }
 
 func main() {
